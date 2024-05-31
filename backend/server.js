@@ -21,6 +21,7 @@ admin.initializeApp({
 
 const generateUploadURL = async () => {
   const date = new Date();
+
   const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
 
   return await s3.getSignedUrlPromise("putObject", {
