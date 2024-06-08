@@ -11,16 +11,40 @@
 
 # eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTkzMWEyMDgxNmIwZWJhMjEzODYwZSIsImlhdCI6MTcxNzEyMTQ0Mn0.aEeaKM51Olt0UFiPlDzcLW8-KH2v9cOZnEm6vXPiFJc
 
-POST  http://localhost:3000/create-blog
+# =============================
+
+
+# Latest blogs
+# GET  http://localhost:3000/latest-blogs
+# Content-Type: application/json
+
+# =============================
+
+# Latest blogs
+# GET  http://localhost:3000/trending-blogs
+# Content-Type: application/json
+# =============================
+
+# search blogs
+POST  http://localhost:3000/search-blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTkzMWEyMDgxNmIwZWJhMjEzODYwZSIsImlhdCI6MTcxNzEyMTQ0Mn0.aEeaKM51Olt0UFiPlDzcLW8-KH2v9cOZnEm6vXPiFJc
 
 {
-    "title": "ssssBlog",
-    "banner":"https://www.google.com/url?sa=i&url=https%3A%2F%2Fletsenhance.io%2F&psig=AOvVaw3QxVAFE9jcr0EvtKi9MrrI&ust=1717118778203000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIiWwomctIYDFQAAAAAdAAAAABAE",
-    "description":"Short description",
-    "content":{
-        "blocks":[1,2]
-    },
-    "tags":["tag1","tag2"]
+    "tag":""
 }
+
+# =============================
+# Create-Blog
+# POST  http://localhost:3000/create-blog
+# Content-Type: application/json
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTkzMWEyMDgxNmIwZWJhMjEzODYwZSIsImlhdCI6MTcxNzEyMTQ0Mn0.aEeaKM51Olt0UFiPlDzcLW8-KH2v9cOZnEm6vXPiFJc
+
+# {
+#     "title": "ssssBlog",
+#     "banner":"https://www.google.com/url?sa=i&url=https%3A%2F%2Fletsenhance.io%2F&psig=AOvVaw3QxVAFE9jcr0EvtKi9MrrI&ust=1717118778203000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCIiWwomctIYDFQAAAAAdAAAAABAE",
+#     "description":"Short description",
+#     "content":{
+#         "blocks":[1,2]
+#     },
+#     "tags":["tag1","tag2"]
+# }

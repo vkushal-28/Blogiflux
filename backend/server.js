@@ -251,6 +251,72 @@ server.post("/google-auth", async (req, res) => {
     });
 });
 
+server.get("/latest-blogs", (req, res) => {
+  let maxLimit = 5;
+
+  Blog.find({ draft: false })
+    .populate(
+      "author",
+      "personal_info.profile_img personal_info.username personal_info.fullname"
+    )
+    .sort({ publishedAt: -1 })
+    .select("blog_id title description banner activity tags publishedAt -_id")
+    .limit(maxLimit)
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.get("/trending-blogs", (req, res) => {
+  Blog.find({ draft: false })
+    .populate(
+      "author",
+      "personal_info.profile_img personal_info.username personal_info.fullname -_id"
+    )
+    .sort({
+      "activity.total_reads": -1,
+      "activity.total_likes": -1,
+      publishedAt: -1,
+    })
+    .select("blog_id title publishedAt -_id")
+    .limit(5)
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/search-blogs", (req, res) => {
+  let { tag } = req.body;
+
+  let findQuery = {
+    tags: tag,
+    draft: false,
+  };
+
+  let maxLimit = 5;
+
+  Blog.find(findQuery)
+    .populate(
+      "author",
+      "personal_info.profile_img personal_info.username personal_info.fullname -_id"
+    )
+    .sort({ publishedAt: -1 })
+    .select("blog_id title description banner activity tags publishedAt -_id")
+    .limit(maxLimit)
+    .then((blogs) => {
+      return res.status(200).json({ blogs });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
 server.post("/create-blog", verifyJJWT, (req, res) => {
   const authorId = req.user;
 
@@ -261,9 +327,9 @@ server.post("/create-blog", verifyJJWT, (req, res) => {
   }
 
   if (!draft) {
-    if (!description.length || description.length > 200) {
+    if (!description.length || description.length > 250) {
       return res.status(403).json({
-        error: "You must provide blog description under 200 characters",
+        error: "You must provide blog description under 250 characters",
       });
     }
 
