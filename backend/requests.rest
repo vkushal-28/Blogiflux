@@ -26,11 +26,21 @@
 # =============================
 
 # search blogs
-POST  http://localhost:3000/search-blogs
+# POST  http://localhost:3000/search-blogs
+# Content-Type: application/json
+
+# {
+#     "tag":"technology",
+#     "page":1,
+#     "query":""
+# }
+
+# search blogs
+POST  http://localhost:3000/search-users
 Content-Type: application/json
 
 {
-    "tag":""
+    "query":"joy"
 }
 
 # =============================
