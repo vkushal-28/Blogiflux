@@ -35,13 +35,26 @@
 #     "query":""
 # }
 
-# search blogs
-POST  http://localhost:3000/search-users
+# =============================
+
+# search users
+# POST  http://localhost:3000/search-users
+# Content-Type: application/json
+
+# {
+#     "query":"joy"
+# }
+
+# =============================
+
+# User Profile
+POST  http://localhost:3000/get-profile
 Content-Type: application/json
 
 {
-    "query":"joy"
+    "username":"kushalvala28296"
 }
+
 
 # =============================
 # Create-Blog

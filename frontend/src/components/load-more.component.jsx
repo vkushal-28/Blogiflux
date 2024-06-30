@@ -1,6 +1,7 @@
 import React from "react";
 
 const LoadMoreData = ({ state, fetchDataFunc }) => {
+  console.log("state", state);
   if (state !== null && state.totalDocs > state.result.length) {
     return (
       <button
