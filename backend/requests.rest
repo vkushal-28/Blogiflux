@@ -48,13 +48,22 @@
 # =============================
 
 # User Profile
-POST  http://localhost:3000/get-profile
+# POST  http://localhost:3000/get-profile
+# Content-Type: application/json
+
+# {
+#     "username":"kushalvala28296"
+# }
+
+# =============================
+
+# User Profile
+POST  http://localhost:3000/get-blog
 Content-Type: application/json
 
 {
-    "username":"kushalvala28296"
+    "blog_id":"India-government-tightens-import-rules-for-unregistered-IT-and-electronic-goods-dI66GCuz6jplmZhR9G8ZZ"
 }
-
 
 # =============================
 # Create-Blog
