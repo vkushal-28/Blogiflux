@@ -316,7 +316,7 @@ server.post("/search-blogs", (req, res) => {
     findQuery = { draft: false, author };
   }
 
-  let maxLimit = 2;
+  let maxLimit = limit || 2;
 
   Blog.find(findQuery)
     .populate(
@@ -336,8 +336,8 @@ server.post("/search-blogs", (req, res) => {
 });
 
 server.post("/get-blog", (req, res) => {
-  let { blog_id } = req.body;
-  const incrementVal = 1;
+  let { blog_id, mode, draft } = req.body;
+  const incrementVal = mode !== "edit" ? 1 : 0;
 
   Blog.findOneAndUpdate(
     { blog_id },
@@ -359,6 +359,12 @@ server.post("/get-blog", (req, res) => {
       ).catch((err) => {
         return res.status(500).json({ error: err.message });
       });
+
+      if (blog.draft && !draft) {
+        return res
+          .status(500)
+          .json({ error: "You can not access draft blogs" });
+      }
 
       return res.status(200).json({ blog });
     })
@@ -392,7 +398,7 @@ server.post("/search-blogs-count", (req, res) => {
 server.post("/create-blog", verifyJJWT, (req, res) => {
   const authorId = req.user;
 
-  let { title, banner, description, tags, content, draft } = req.body;
+  let { title, banner, description, tags, content, draft, id } = req.body;
 
   if (!title.length) {
     return res.status(403).json({ error: "You must provide a title" });
@@ -432,42 +438,45 @@ server.post("/create-blog", verifyJJWT, (req, res) => {
       .replace(/\s+/g, "-")
       .trim() + nanoid();
 
-  let blog = new Blog({
-    title,
-    banner,
-    description,
-    content,
-    tags,
-    author: authorId,
-    blog_id,
-    draft: Boolean(draft),
-  });
-
-  blog
-    .save()
-    .then((blog) => {
-      let incrementVal = draft ? 0 : 1;
-      User.findOneAndUpdate(
-        { _id: authorId },
-        {
-          $inc: { "account_info.total_posts": incrementVal },
-          $push: {
-            blogs: blog._id,
-          },
-        }
-      )
-        .then((user) => {
-          return res.status(200).json({ id: blog_id });
-        })
-        .catch((err) => {
-          return res
-            .status(500)
-            .json({ error: "Failed to update total posts number" });
-        });
-    })
-    .catch((err) => {
-      return res.status(200).json({ error: err.message });
+  if (id) {
+  } else {
+    let blog = new Blog({
+      title,
+      banner,
+      description,
+      content,
+      tags,
+      author: authorId,
+      blog_id,
+      draft: Boolean(draft),
     });
+
+    blog
+      .save()
+      .then((blog) => {
+        let incrementVal = draft ? 0 : 1;
+        User.findOneAndUpdate(
+          { _id: authorId },
+          {
+            $inc: { "account_info.total_posts": incrementVal },
+            $push: {
+              blogs: blog._id,
+            },
+          }
+        )
+          .then((user) => {
+            return res.status(200).json({ id: blog_id });
+          })
+          .catch((err) => {
+            return res
+              .status(500)
+              .json({ error: "Failed to update total posts number" });
+          });
+      })
+      .catch((err) => {
+        return res.status(200).json({ error: err.message });
+      });
+  }
 });
 
 server.post("/search-users", (req, res) => {

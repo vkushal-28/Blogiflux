@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import logo from "../imgs/logo.png";
 import AnimationWrapper from "../common/page-animation";
 import { uploadImage } from "../common/aws";
@@ -13,6 +13,7 @@ import { UserContext } from "../App";
 
 const BlogEditor = () => {
   const navigate = useNavigate();
+  const { blog_id } = useParams();
 
   let {
     blog,
@@ -33,7 +34,7 @@ const BlogEditor = () => {
       setTextEditor(
         new EditorJS({
           holderId: "textEditor",
-          data: content,
+          data: Array.isArray(content) ? content[0] : content,
           tools: tools,
           placeholder: "Let's write an awesomw blog.",
         })
@@ -133,11 +134,15 @@ const BlogEditor = () => {
         };
 
         axios
-          .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
-            headers: {
-              Authorization: `Bearer ${access_token}`,
-            },
-          })
+          .post(
+            import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+            { ...blogObj, id: blog_id },
+            {
+              headers: {
+                Authorization: `Bearer ${access_token}`,
+              },
+            }
+          )
           .then(() => {
             e.target.classList.remove("disable");
 
@@ -197,7 +202,7 @@ const BlogEditor = () => {
               className="text-4xl font-medium w-full h-20 outline-none resize-none mt-10 leading-tight placeholder:opacity-40"
               onKeyDown={handleTitleKeyDown}
               onChange={handleTitleChange}
-              value={title}
+              value={title || ""}
             ></textarea>
             <hr className="w-full opacity-10 my-5" />
             <div id="textEditor" className="font-gelasio"></div>
