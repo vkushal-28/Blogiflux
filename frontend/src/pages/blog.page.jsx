@@ -26,35 +26,24 @@ const BlogPage = () => {
   const [blog, setBlog] = useState(blogStructure);
   const [similarBlogs, setSimilarBlogs] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  let {
-    title,
-    content,
-    banner,
-    author: {
-      personal_info: { fullname, username: author_username, profile_img },
-    },
-    publishedAt,
-  } = blog;
+  const [isLikedByUser, setLikedByUser] = useState(false);
 
   const fetchBlog = async () => {
     await axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
-      .then(({ data: { blog } }) => {
-        setBlog(blog);
+      .then(async ({ data: { blog } }) => {
+        await setBlog(blog);
 
-        setLoading(false);
-        console.log(blog.content);
-        axios
+        await axios
           .post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
             tag: blog.tags[0],
             limit: 6,
             eliminate_blog: blog_id,
           })
           .then(({ data }) => {
-            console.log(data.blogs);
             setSimilarBlogs(data.blogs);
           });
+        setLoading(false);
       })
       .catch((err) => {
         setLoading(false);
@@ -65,6 +54,16 @@ const BlogPage = () => {
     fetchBlog();
     resetStates();
   }, [blog_id]);
+
+  let {
+    title,
+    content,
+    banner,
+    author: {
+      personal_info: { fullname, username: author_username, profile_img },
+    },
+    publishedAt,
+  } = blog;
 
   const resetStates = () => {
     setBlog(blogStructure);
@@ -77,7 +76,9 @@ const BlogPage = () => {
       {loading ? (
         <Loader />
       ) : (
-        <BlogContext.Provider value={{ blog, setBlog }}>
+        <BlogContext.Provider
+          value={{ blog, setBlog, setLikedByUser, isLikedByUser }}
+        >
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
             <img src={banner} className="aspect-video" alt="" />
             <div className="mt-12">
@@ -85,7 +86,7 @@ const BlogPage = () => {
               <div className="flex max-sm:flex-col justify-between my-8">
                 <div className="flex gap-5 items-start">
                   <img
-                    src={profile_img}
+                    src={profile_img || null}
                     alt=""
                     className="w-12 h-12 rounded-full"
                   />
@@ -110,7 +111,7 @@ const BlogPage = () => {
               content.length &&
               content[0].blocks.map((block, i) => {
                 return (
-                  <div className="my-4 md:my-8">
+                  <div className="my-4 md:my-8" key={i}>
                     <BlogContent block={block} />
                   </div>
                 );

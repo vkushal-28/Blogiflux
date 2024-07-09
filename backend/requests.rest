@@ -58,12 +58,12 @@
 # =============================
 
 # User Profile
-POST  http://localhost:3000/get-blog
-Content-Type: application/json
+# POST  http://localhost:3000/get-blog
+# Content-Type: application/json
 
-{
-    "blog_id":"India-government-tightens-import-rules-for-unregistered-IT-and-electronic-goods-dI66GCuz6jplmZhR9G8ZZ"
-}
+# {
+#     "blog_id":"India-government-tightens-import-rules-for-unregistered-IT-and-electronic-goods-dI66GCuz6jplmZhR9G8ZZ"
+# }
 
 # =============================
 # Create-Blog
@@ -80,3 +80,10 @@ Content-Type: application/json
 #     },
 #     "tags":["tag1","tag2"]
 # }
+
+POST  http://localhost:3000/like-blog
+
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTkzMWEyMDgxNmIwZWJhMjEzODYwZSIsImlhdCI6MTcxNzEyMTQ0Mn0.aEeaKM51Olt0UFiPlDzcLW8-KH2v9cOZnEm6vXPiFJc
+
+{"_id":"668b13f5464cf380745e3582","isLikedByUser":true}

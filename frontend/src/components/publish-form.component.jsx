@@ -5,13 +5,15 @@ import { EditorContext } from "../pages/editor.pages";
 import Tag from "./tags.component";
 import axios from "axios";
 import { UserContext } from "../App";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const PublishForm = () => {
   const characterLimit = 250;
   const tagLimit = 10;
 
   const navigate = useNavigate();
+  const { blog_id } = useParams();
+
   let {
     blog,
     blog: { banner, title, tags, content, description },
@@ -67,7 +69,6 @@ const PublishForm = () => {
     if (!title.length) {
       return toast.error("Write blog title before publish");
     }
-    console.log(description.length);
     if (!description.length || description.length > characterLimit) {
       return toast.error(
         `Write a description about your blog withing ${characterLimit} characters to publish`
@@ -93,11 +94,15 @@ const PublishForm = () => {
     };
 
     axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + "/create-blog", blogObj, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      })
+      .post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/create-blog",
+        { ...blogObj, id: blog_id },
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      )
       .then(() => {
         e.target.classList.remove("disable");
 

@@ -45,7 +45,7 @@ const Editor = () => {
       })
       .catch((err) => {
         setBlog(blog);
-        setLoading(false); 
+        setLoading(false);
         console.log(err.message);
       });
   }, []);

@@ -11,6 +11,7 @@ import cors from "cors";
 import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
 import aws from "aws-sdk";
+import Notification from "./Schema/Notification.js";
 
 const server = express();
 let PORT = 3000;
@@ -99,7 +100,6 @@ server.get("/get-upload-url", async (req, res) => {
   await generateUploadURL()
     .then((url) => res.status(200).json({ uploadURL: url }))
     .catch((err) => {
-      console.log(err.message);
       return res.status(500).json({ error: err.message });
     });
 });
@@ -433,12 +433,30 @@ server.post("/create-blog", verifyJJWT, (req, res) => {
   tags = tags.map((tag) => tag.toLowerCase());
 
   let blog_id =
+    id ||
     title
       .replace(/[^a-zA-Z0-9]/g, " ")
       .replace(/\s+/g, "-")
       .trim() + nanoid();
 
   if (id) {
+    Blog.findOneAndUpdate(
+      { blog_id },
+      {
+        title,
+        description,
+        content,
+        banner,
+        tags,
+        draft: draft ? draft : false,
+      }
+    )
+      .then((blog) => {
+        return res.status(200).json({ id: blog_id });
+      })
+      .catch((err) => {
+        return res.status(500).json({ error: err.message });
+      });
   } else {
     let blog = new Blog({
       title,
@@ -501,6 +519,60 @@ server.post("/get-profile", (req, res) => {
     .select("-personal_info.password -google_auth -updatedAt -blogs ")
     .then((user) => {
       return res.status(200).json(user);
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/like-blog", verifyJJWT, (req, res) => {
+  const user_id = req.user;
+  const { _id, isLikedByUser } = req.body;
+
+  const incrementVal = !isLikedByUser ? 1 : -1;
+
+  Blog.findOneAndUpdate(
+    { _id },
+    { $inc: { "activity.total_likes": incrementVal } }
+  )
+    .then((blog) => {
+      if (!isLikedByUser) {
+        let like = new Notification({
+          type: "like",
+          blog: _id,
+          notification_for: blog.author,
+          user: user_id,
+        });
+
+        like.save().then((notification) => {
+          return res.status(200).json({ liked_by_user: true });
+        });
+      } else {
+        Notification.findOneAndDelete({
+          type: "like",
+          blog: _id,
+          user: user_id,
+        })
+          .then((data) => {
+            return res.status(200).json({ liked_by_user: false });
+          })
+          .catch((err) => {
+            return res.status(500).json({ error: err.message });
+          });
+      }
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/isLiked-by-user", verifyJJWT, (req, res) => {
+  const user_id = req.user;
+  const { _id } = req.body;
+
+  Notification.exists({ user: user_id, type: "like", blog: _id })
+    .then((result) => {
+      return res.status(200).json({ result });
     })
     .catch((err) => {
       return res.status(500).json({ error: err.message });
