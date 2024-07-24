@@ -12,6 +12,7 @@ import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
 import aws from "aws-sdk";
 import Notification from "./Schema/Notification.js";
+import Comment from "./Schema/Comment.js";
 
 const server = express();
 let PORT = 3000;
@@ -573,6 +574,87 @@ server.post("/isLiked-by-user", verifyJJWT, (req, res) => {
   Notification.exists({ user: user_id, type: "like", blog: _id })
     .then((result) => {
       return res.status(200).json({ result });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/add-comment", verifyJJWT, (req, res) => {
+  const user_id = req.user;
+  const { _id, comment, blog_author } = req.body;
+
+  if (!comment.length) {
+    return res
+      .status(403)
+      .json({ error: "Write something to leave a comment" });
+  }
+
+  // Creating a comment document
+  let commentObj = new Comment({
+    blog_id: _id,
+    blog_author,
+    comment,
+    commented_by: user_id,
+  });
+
+  commentObj
+    .save()
+    .then((commentFile) => {
+      const { comment, commentedAt, children } = commentFile;
+
+      Blog.findOneAndUpdate(
+        { _id },
+        {
+          $push: { comments: commentFile._id },
+          $inc: {
+            "activity.total_comments": 1,
+            "activity.total_parent_comments": 1,
+          },
+        }
+      ).then((blog) => {
+        console.log("New comment created");
+      });
+
+      let notificationObj = {
+        type: "comment",
+        blog: _id,
+        notification_for: blog_author,
+        user: user_id,
+        comment: commentFile._id,
+      };
+
+      new Notification(notificationObj).save().then((notification) => {
+        console.log("New notification created");
+      });
+
+      return res.status(200).json({
+        comment,
+        commentedAt,
+        _id: commentFile._id,
+        user_id,
+        children,
+      });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err.message });
+    });
+});
+
+server.post("/get-blog-comments", (req, res) => {
+  let { blog_id, skip } = req.body;
+  let maxLimit = 5;
+
+  Comment.find({ blog_id, isReply: false })
+    .populate(
+      "commented_by",
+      "personal_info.username personal_info.fullname personal_info.profile_img"
+    )
+    .skip(skip)
+    .limit(maxLimit)
+    .sort({ commentedAt: -1 })
+    .then((comment) => {
+      return res.status(200).json(comment);
     })
     .catch((err) => {
       return res.status(500).json({ error: err.message });

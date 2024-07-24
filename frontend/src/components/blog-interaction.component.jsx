@@ -21,6 +21,7 @@ const BlogInteraction = () => {
     isLikedByUser,
     setLikedByUser,
     setBlog,
+    setCommentsWrapper,
   } = useContext(BlogContext);
 
   const {
@@ -43,7 +44,6 @@ const BlogInteraction = () => {
           }
         )
         .then(({ data: { result } }) => {
-          console.log(result);
           setLikedByUser(Boolean(result));
         })
         .catch((err) => {
@@ -73,7 +73,7 @@ const BlogInteraction = () => {
           }
         )
         .then(({ data }) => {
-          console.log(data);
+          // console.log(data);
         })
         .catch((err) => {
           console.log(err);
@@ -94,8 +94,7 @@ const BlogInteraction = () => {
               "w-10 h-10 rounded-full flex items-center justify-center " +
               (isLikedByUser ? "bg-red/20 text-red" : " bg-grey/80")
             }
-            onClick={handleLike}
-          >
+            onClick={handleLike}>
             <i
               className={
                 "fi " + (isLikedByUser ? "fi-sr-heart" : "fi-rr-heart")
@@ -103,7 +102,9 @@ const BlogInteraction = () => {
             />
           </button>
           <p className="text-xl text-dark-grey">{total_likes || 0}</p>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80">
+          <button
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-grey/80"
+            onClick={() => setCommentsWrapper((preVal) => !preVal)}>
             <i className="fi fi-rr-comment-dots" />
           </button>
           <p className="text-xl text-dark-grey">{total_comments}</p>
@@ -113,16 +114,14 @@ const BlogInteraction = () => {
           {username == author_username ? (
             <Link
               to={`/editor/${blog_id}`}
-              className="underline hover:text-purple"
-            >
+              className="underline hover:text-purple">
               Edit
             </Link>
           ) : (
             ""
           )}
           <Link
-            to={`https://twitter.com/intent/tweet?text=Read ${title}&url=${location.href}`}
-          >
+            to={`https://twitter.com/intent/tweet?text=Read ${title}&url=${location.href}`}>
             <i className="fi fi-brands-twitter text-xl hover:text-twitter"></i>
           </Link>
         </div>

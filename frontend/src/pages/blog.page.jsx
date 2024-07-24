@@ -7,12 +7,16 @@ import { getDay } from "../common/date";
 import BlogInteraction from "../components/blog-interaction.component";
 import BlogPostCard from "../components/blog-post.component";
 import BlogContent from "../components/blog-content.component";
+import CommentsContainer, {
+  fetchComments,
+} from "../components/comments.component";
 
 const blogStructure = {
   title: "",
   description: "",
   banner: "",
   content: [],
+  comments: {},
   tags: [],
   activity: {},
   author: { personal_info: {} },
@@ -23,15 +27,36 @@ export const BlogContext = createContext({});
 
 const BlogPage = () => {
   const { blog_id } = useParams();
+
   const [blog, setBlog] = useState(blogStructure);
   const [similarBlogs, setSimilarBlogs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLikedByUser, setLikedByUser] = useState(false);
+  const [commentsWrapper, setCommentsWrapper] = useState(false);
+  const [totalParentCommentsLoaded, setTotalParentCommentsLoaded] = useState(0);
+
+
+
+  let {
+    title,
+    content,
+    banner,
+    author: {
+      personal_info: { fullname, username: author_username, profile_img },
+    },
+    publishedAt,
+  } = blog;
 
   const fetchBlog = async () => {
     await axios
       .post(import.meta.env.VITE_SERVER_DOMAIN + "/get-blog", { blog_id })
       .then(async ({ data: { blog } }) => {
+        blog.comments =
+          (await fetchComments({
+            blog_id: blog._id,
+            setParentCommentCountFunc: setTotalParentCommentsLoaded,
+          })) || null;
+
         await setBlog(blog);
 
         await axios
@@ -55,20 +80,13 @@ const BlogPage = () => {
     resetStates();
   }, [blog_id]);
 
-  let {
-    title,
-    content,
-    banner,
-    author: {
-      personal_info: { fullname, username: author_username, profile_img },
-    },
-    publishedAt,
-  } = blog;
-
   const resetStates = () => {
     setBlog(blogStructure);
     setSimilarBlogs(null);
     setLoading(null);
+    setLikedByUser(false);
+    // setCommentsWrapper(false);
+    setTotalParentCommentsLoaded(0);
   };
 
   return (
@@ -77,8 +95,17 @@ const BlogPage = () => {
         <Loader />
       ) : (
         <BlogContext.Provider
-          value={{ blog, setBlog, setLikedByUser, isLikedByUser }}
-        >
+          value={{
+            blog,
+            setBlog,
+            setLikedByUser,
+            isLikedByUser,
+            commentsWrapper,
+            setCommentsWrapper,
+            totalParentCommentsLoaded,
+            setTotalParentCommentsLoaded,
+          }}>
+          <CommentsContainer />
           <div className="max-w-[900px] center py-10 max-lg:px-[5vw]">
             <img src={banner} className="aspect-video" alt="" />
             <div className="mt-12">
@@ -133,8 +160,7 @@ const BlogPage = () => {
                   return (
                     <AnimationWrapper
                       key={i}
-                      transition={{ duration: 1, delay: i * 0.08 }}
-                    >
+                      transition={{ duration: 1, delay: i * 0.08 }}>
                       <BlogPostCard content={blog} author={personal_info} />
                     </AnimationWrapper>
                   );

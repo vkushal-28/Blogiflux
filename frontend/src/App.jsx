@@ -9,6 +9,7 @@ import SearchPage from "./pages/search.page";
 import PageNotFound from "./pages/404.page";
 import ProfilePage from "./pages/profile.page";
 import BlogPage from "./pages/blog.page";
+import { Toaster } from "react-hot-toast";
 
 export const UserContext = createContext({});
 
@@ -25,6 +26,7 @@ const App = () => {
 
   return (
     <UserContext.Provider value={{ userAuth, setUserAuth }}>
+      <Toaster />
       <Routes>
         <Route path="/editor" element={<Editor />} />
         <Route path="/editor/:blog_id" element={<Editor />} />

@@ -110,8 +110,7 @@ const HomePage = () => {
         <div className="w-full">
           <InPageNavigation
             routes={[pageState, "trending blogs"]}
-            defaultHidden={["trending blogs"]}
-          >
+            defaultHidden={["trending blogs"]}>
             <>
               {blogs == null ? (
                 <Loader />
@@ -120,8 +119,7 @@ const HomePage = () => {
                   return (
                     <AnimationWrapper
                       transition={{ duration: 1, delay: i * 0.1 }}
-                      key={i}
-                    >
+                      key={i}>
                       <BlogPostCard
                         content={blog}
                         author={blog.author.personal_info}
@@ -148,8 +146,7 @@ const HomePage = () => {
                   return (
                     <AnimationWrapper
                       transition={{ duration: 1, delay: i * 0.1 }}
-                      key={i}
-                    >
+                      key={i}>
                       <MinimalBlogPostCard blog={blog} index={i} />
                     </AnimationWrapper>
                   );
@@ -174,8 +171,7 @@ const HomePage = () => {
                       pageState == category && "bg-black text-white"
                     } `}
                     key={i}
-                    onClick={loadBlogByCategory}
-                  >
+                    onClick={loadBlogByCategory}>
                     {category}
                   </button>
                 );
@@ -194,8 +190,7 @@ const HomePage = () => {
                 return (
                   <AnimationWrapper
                     transition={{ duration: 1, delay: i * 0.1 }}
-                    key={i}
-                  >
+                    key={i}>
                     <MinimalBlogPostCard blog={blog} index={i} />
                   </AnimationWrapper>
                 );
